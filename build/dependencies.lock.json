@@ -1,7 +1,7 @@
 {
   "python-3.13.16-embed-amd64.zip": "97dae5274cc54867065e8d5a3226e48c35017ed332a0fdb0e27d5b5821961297",
   "psutil-7.2.2-cp37-abi3-win_amd64.whl": "eb7e81434c8d223ec4a219b5fc1c47d0417b12be7ea866e24fb5ad6e84b3d988",
-  "websocket_client-1.9.2-py3-none-any.whl": "e1a673830a9c7bfa47b1cd3d5e4178f4c9651d80a4eab02c9c23a1c3ec6250ce",
+  "websocket_client-1.8.0-py3-none-any.whl": "17b44cc997f5c498e809b22cdf2d9c7a9e71c02c8cc2b6c56e7c2d1239bfa526",
   "pywin32-312-cp313-cp313-win_amd64.whl": "c53e878d15a1c44788082bfe712a905433473aa38f86375b7cf8b45e3acbaaf9",
   "node-v22.23.3-win-x64.zip": "2b0ff57b049cda1bbcea2240eec20467018713c1efe1f7360c2681859b90ed71"
 }

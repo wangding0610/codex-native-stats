@@ -209,7 +209,7 @@ class UsageWorker:
 
 class CDP:
     def __init__(self,url):
-        self.ws=websocket.create_connection(url,timeout=1,suppress_origin=True)
+        self.ws=websocket.create_connection(url,timeout=1,suppress_origin=True,http_no_proxy=['127.0.0.1','localhost','::1'])
         self.lock=threading.Lock();self.pending={};self.serial=0;self.events=queue.Queue();self.alive=True;self.contexts={}
         threading.Thread(target=self.receive,daemon=True).start()
     def receive(self):

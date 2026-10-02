@@ -1,6 +1,6 @@
 {
   "name": "codex-native-stats",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "在官方客户端输入栏显示会话统计和 Token 用量，支持插件启用/停用开关。",
   "author": {
     "name": "wangding0610"

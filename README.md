@@ -7,7 +7,7 @@
 ## 安装
 
 1. 安装 Windows x64 微软商店版 Codex，至少启动过一次。
-2. 从 [GitHub Releases](https://github.com/wangding0610/codex-native-stats/releases/latest) 下载 `CodexStats-Setup-3.0.0-windows-x64.exe` 并运行。
+2. 从 [GitHub Releases](https://github.com/wangding0610/codex-native-stats/releases/latest) 下载 `CodexStats-Setup-3.0.1-windows-x64.exe` 并运行。
 3. 保存当前任务，**正常退出客户端一次**，再从桌面的 **Codex 官方版（输入栏统计）** 打开。
 4. 在 Codex 的「设置 → 插件」中找到 **Codex 输入栏统计**，可以启用或停用。
 

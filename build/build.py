@@ -8,7 +8,7 @@ PAYLOAD = ROOT/'build/payload'
 DIST = ROOT/'dist'
 PYTHON = '3.13.16'
 NODE = '22.23.3'
-PACKAGES = {'psutil':'7.2.2','websocket-client':'1.9.2','pywin32':'312'}
+PACKAGES = {'psutil':'7.2.2','websocket-client':'1.8.0','pywin32':'312'}
 
 def fetch(url):
     data = urllib.request.urlopen(url,timeout=60).read()
@@ -65,8 +65,10 @@ def main():
         shutil.copyfile(file,PAYLOAD/'python'/file.name)
     node_name = f'node-v{NODE}-win-x64.zip'
     node_base = f'https://nodejs.org/dist/v{NODE}/'
-    sums = fetch(node_base+'SHASUMS256.txt').decode('ascii')
-    expected = next(line.split()[0] for line in sums.splitlines() if line.split()[-1]==node_name)
+    expected = lock.get(node_name)
+    if not expected:
+        sums = fetch(node_base+'SHASUMS256.txt').decode('ascii')
+        expected = next(line.split()[0] for line in sums.splitlines() if line.split()[-1]==node_name)
     node_file,node_hash = download(node_base+node_name,node_name,expected)
     dependencies.append({'name':'Node.js','version':NODE,'url':node_base+node_name,'sha256':node_hash})
     (PAYLOAD/'node').mkdir()

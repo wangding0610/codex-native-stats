@@ -17,7 +17,7 @@ class Setup {
         string temp = Path.Combine(Path.GetTempPath(), "CodexStatsSetup-" + Guid.NewGuid().ToString("N"));
         try {
             if (!Environment.Is64BitOperatingSystem) throw new Exception("Windows x64 is required.");
-            if (!silent && MessageBox.Show("安装 Codex 输入栏统计 3.0.0？\n\n适用于 Windows x64 微软商店版 Codex，包含运行环境，无需管理员权限。\n请先保存任务，安装后用“Codex 官方版（输入栏统计）”启动。\n\n项目按 MIT 协议开源。", "Codex 输入栏统计", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) != DialogResult.OK) return 2;
+            if (!silent && MessageBox.Show("安装 Codex 输入栏统计 3.0.1？\n\n适用于 Windows x64 微软商店版 Codex，包含运行环境，无需管理员权限。\n请先保存任务，安装后用“Codex 官方版（输入栏统计）”启动。\n\n项目按 MIT 协议开源。", "Codex 输入栏统计", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) != DialogResult.OK) return 2;
             Directory.CreateDirectory(temp);
             string zip = Path.Combine(temp, "payload.zip");
             using (var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("payload.zip"))
