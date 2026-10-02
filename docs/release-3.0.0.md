@@ -14,4 +14,6 @@
 
 下载 `CodexStats-Setup-3.0.0-windows-x64.exe` 安装。`CodexStats-3.0.0-windows-x64.zip` 提供完整运行文件；`SHA256SUMS.txt` 用于校验下载完整性。
 
+GitHub 市场的真实下载、启用、MCP 加载、卸载和配置保留共 5 项检查通过。中文快捷方式使用 Unicode ShellLink 接口，兼容英文 Windows。
+
 此版本未做 Authenticode 签名。挂载使用本地 renderer 端点，不是官方输入栏扩展 API；未来客户端界面变化可能需要插件适配。统计数据不是计费账单。

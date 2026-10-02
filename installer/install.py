@@ -92,24 +92,35 @@ def release_mcp_cache(home):
                 process.terminate(); process.wait(timeout=5)
         except (psutil.NoSuchProcess, psutil.AccessDenied): pass
 
+def shortcut_target(file):
+    import pythoncom
+    from win32com.shell import shell
+    link = pythoncom.CoCreateInstance(shell.CLSID_ShellLink,None,pythoncom.CLSCTX_INPROC_SERVER,shell.IID_IShellLink)
+    link.QueryInterface(pythoncom.IID_IPersistFile).Load(str(file))
+    return Path(link.GetPath(shell.SLGP_RAWPATH)[0]).resolve()
+
+def save_shortcut(file, target, argument, directory):
+    import pythoncom
+    from win32com.shell import shell
+    link = pythoncom.CoCreateInstance(shell.CLSID_ShellLink,None,pythoncom.CLSCTX_INPROC_SERVER,shell.IID_IShellLink)
+    link.SetPath(str(target)); link.SetArguments(argument); link.SetWorkingDirectory(str(directory))
+    link.SetShowCmd(7); link.SetDescription('官方 Codex 客户端与本地输入栏统计')
+    # IPersistFile uses Unicode paths, unlike WScript.Save on some ANSI locales.
+    link.QueryInterface(pythoncom.IID_IPersistFile).Save(str(file),0)
+
 def integrations(root, version, home):
-    import win32com.client
-    shell = win32com.client.Dispatch('WScript.Shell')
+    from win32com.shell import shell, shellcon
     shortcuts = []
-    desktop = Path(shell.SpecialFolders('Desktop'))
-    programs = Path(shell.SpecialFolders('Programs'))/'Codex 输入栏统计'
+    desktop = Path(shell.SHGetFolderPath(0,shellcon.CSIDL_DESKTOPDIRECTORY,0,0))
+    programs = Path(shell.SHGetFolderPath(0,shellcon.CSIDL_PROGRAMS,0,0))/'Codex 输入栏统计'
     programs.mkdir(parents=True, exist_ok=True)
     for file, argument in [(desktop/'Codex 官方版（输入栏统计）.lnk','--launch'),
                            (programs/'Codex 官方版（输入栏统计）.lnk','--launch'),
                            (programs/'卸载 Codex 输入栏统计.lnk','--uninstall')]:
         if file.exists():
-            existing = shell.CreateShortcut(str(file))
-            if Path(existing.TargetPath).resolve() != (root/'CodexStats.exe').resolve():
+            if shortcut_target(file) != (root/'CodexStats.exe').resolve():
                 raise RuntimeError('快捷方式名称已由其他应用使用：'+file.name)
-        link = shell.CreateShortcut(str(file)); link.TargetPath = str(root/'CodexStats.exe')
-        link.Arguments = argument; link.WorkingDirectory = str(root); link.WindowStyle = 7
-        link.Description = '官方 Codex 客户端与本地输入栏统计'
-        link.Save(); shortcuts.append(str(file))
+        save_shortcut(file,root/'CodexStats.exe',argument,root); shortcuts.append(str(file))
     with winreg.CreateKey(winreg.HKEY_CURRENT_USER, REGISTRY) as key:
         winreg.SetValueEx(key, 'InstallRoot', 0, winreg.REG_SZ, str(root))
     with winreg.CreateKey(winreg.HKEY_CURRENT_USER, UNINSTALL) as key:
@@ -201,11 +212,9 @@ def uninstall(args):
     if 'codex-stats' in configuration(home).get('marketplaces',{}):
         cli(command,home,'marketplace','remove','codex-stats')
     if not record.get('isolated'):
-        import win32com.client
-        shell = win32com.client.Dispatch('WScript.Shell')
         for entry in record.get('shortcuts',[]):
             file = Path(entry)
-            if file.is_file() and Path(shell.CreateShortcut(str(file)).TargetPath).resolve()==root/'CodexStats.exe':
+            if file.is_file() and shortcut_target(file)==root/'CodexStats.exe':
                 file.unlink()
                 if file.parent.name=='Codex 输入栏统计' and not any(file.parent.iterdir()): file.parent.rmdir()
         for path in [UNINSTALL, REGISTRY]:

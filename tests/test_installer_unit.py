@@ -48,26 +48,23 @@ class InstallerTests(unittest.TestCase):
         self.assertFalse(any((root/'versions').iterdir()))
 
     def test_real_shortcuts_and_registry_use_only_owned_locations(self):
-        import win32com.client
-        real=win32com.client.Dispatch('WScript.Shell')
-        original_dispatch=win32com.client.Dispatch
+        import pythoncom
+        from win32com.shell import shell,shellcon
         desktop=self.base/'desktop';desktop.mkdir()
         programs=self.base/'programs';programs.mkdir()
-        class Shell:
-            def SpecialFolders(self,name): return str(desktop if name=='Desktop' else programs)
-            def CreateShortcut(self,file): return real.CreateShortcut(file)
         key=r'Software\CodexStatsValidation-'+uuid.uuid4().hex
         uninstall=key+'-uninstall'
-        def dispatch(value,*args,**kwargs):
-            return Shell() if isinstance(value,str) and value=='WScript.Shell' else original_dispatch(value,*args,**kwargs)
+        def folder(hwnd,csidl,token,flags):
+            return str(desktop if csidl==shellcon.CSIDL_DESKTOPDIRECTORY else programs)
         try:
-            with patch.object(win32com.client,'Dispatch',side_effect=dispatch),patch.object(install,'REGISTRY',key),patch.object(install,'UNINSTALL',uninstall):
+            with patch.object(shell,'SHGetFolderPath',side_effect=folder),patch.object(install,'REGISTRY',key),patch.object(install,'UNINSTALL',uninstall):
                 links=install.integrations(self.base,'3.0.0',self.base/'home')
             self.assertEqual(len(links),3)
             for file in links:
-                link=real.CreateShortcut(file)
-                self.assertEqual(Path(link.TargetPath),self.base/'CodexStats.exe')
-                self.assertIn(link.Arguments,['--launch','--uninstall'])
+                self.assertEqual(install.shortcut_target(file),self.base/'CodexStats.exe')
+                link=pythoncom.CoCreateInstance(shell.CLSID_ShellLink,None,pythoncom.CLSCTX_INPROC_SERVER,shell.IID_IShellLink)
+                link.QueryInterface(pythoncom.IID_IPersistFile).Load(file)
+                self.assertIn(link.GetArguments(),['--launch','--uninstall'])
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER,key) as handle:
                 self.assertEqual(winreg.QueryValueEx(handle,'InstallRoot')[0],str(self.base))
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER,uninstall) as handle:

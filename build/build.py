@@ -30,7 +30,7 @@ def clean(directory):
 
 def compile_cs(source, output, target='exe', extra=()):
     compiler = Path(os.environ.get('WINDIR','C:/Windows'))/'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-    subprocess.run([str(compiler),'/nologo','/optimize+','/target:'+target,'/out:'+str(output),
+    subprocess.run([str(compiler),'/nologo','/optimize+','/codepage:65001','/target:'+target,'/out:'+str(output),
                     *extra,str(ROOT/'build'/source)],check=True)
 
 def main():

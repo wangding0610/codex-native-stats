@@ -48,6 +48,10 @@ These tests launch a separate profile with synthetic records. Fixture layout
 tests do not certify all real account-backed client layouts. Never distribute
 test reports, user data, credentials, logs or backup scripts with a release.
 
+After publishing the repository, `python tests/test_remote_marketplace.py`
+checks the real GitHub download, plugin installation, bundled MCP runtime and
+uninstall in an isolated home. This optional test requires Git and the Codex CLI.
+
 For a release, update VERSION, plugin manifest/server versions and release
 documentation together. Build, run the tests, then publish the setup EXE,
 runtime ZIP and SHA256SUMS.txt under a matching tag.
