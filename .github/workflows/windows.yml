@@ -1,0 +1,20 @@
+name: Windows build and regression
+on:
+  push:
+  pull_request:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python build/build.py
+      - run: build/payload/python/python.exe tests/test_installer_unit.py
+      - run: build/payload/python/python.exe plugins/codex-native-stats/tests/test_startup.py
+      - run: build/payload/node/node.exe plugins/codex-native-stats/tests/test_speed.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-release
+          path: dist/*

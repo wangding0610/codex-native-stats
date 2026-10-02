@@ -1,0 +1,26 @@
+---
+name: native-stats
+description: Manage or troubleshoot the Codex 输入栏统计 plugin when the user asks about this plugin, its switch, or its counters in the official App input bar.
+---
+
+# Codex 输入栏统计
+
+This plugin runs in the official Store App. Its local adapter attaches to the App renderer and embeds the existing statistics controls. The separate statistics client was removed at the user's request. Keep the official installation and the user's login and chat data intact.
+
+Use the plugin's native enable/disable switch in App plugin management. Display name: **Codex 输入栏统计**. Plugin ID remains `codex-native-stats@codex-stats`. Switching hides/shows both controls and hover panels in about 1.2 seconds when the adapter is connected.
+
+The plugin server offers `statistics_status` and `start_input_bar_statistics`. Check status before claiming that controls are visible. `waiting_for_exit` means the current official App started without the local renderer endpoint; it must exit normally once before the loader can open the official package with that endpoint. Preserve active tasks. After the first setup, the desktop **Codex 官方版（输入栏统计）** entry opens the registered official package and its adapter. The launcher locates the current Store package; interface changes after an update can still require maintenance.
+
+The adapter uses the official App renderer endpoint bound to loopback, validates its process and profile, and passes only statistics through a scoped renderer binding. It does not patch Store files or create a client copy. Runtime state is under `~/.codex/plugins/state/codex-native-stats`; source is under `the installed plugin cache`. Changes should be tested with an isolated official App profile before updating the plugin version.
+
+Status includes `adapter.controllerRunning` and actual renderer geometry under `ui`. An active adapter alone does not prove visibility: check `ui.visibleControls`, `ui.missingControls`, and `insideInputBar` for active existing chats. New chats intentionally hide counters. Chat identity can be a UUID or `local:<UUID>`; normalize before reading records. If the adapter exits, starting it again replaces the renderer transport without restarting the official App.
+
+From 2.0.4, `waiting_for_renderer` means the official App already has the correct local renderer launch flags and the adapter will wait for that endpoint without the old 45-second startup timeout. An App with those flags does not require another restart. If a stale status reports `failed` but the validated endpoint is now available, start the adapter and verify actual geometry. API/custom-provider mode uses the same local records; preserve authentication and provider settings during repairs. Missing plugin registration and a launch without endpoint flags are distinct from slow startup.
+
+From 2.0.5, stalled startup checks are retried every five seconds in an independent short-lived process. It applies the same official process, browser profile, and loopback validation; it does not accept arbitrary ports. Failed checks include an `adapter.endpoint.reason`, and recovery records `recoveredByFreshProbe`. For an App already launched with the proper flags, verify and repair the adapter without restarting the App. `waiting_for_exit` includes an actionable explanation that waiting longer in an unflagged window cannot enable controls.
+
+From 2.0.6, endpoint discovery checks both the logical Roaming location and the official MSIX package's physical `LocalCache/Roaming` location. An Explorer-launched adapter sees the logical port file as absent even when a process launched from the App sees it as present through redirection. Inspect `adapter.endpoint.portFile` or the probe diagnostic to identify the actual file used; do not diagnose this as slow startup. Keep listener owner, browser argument, and loopback validation for either file. Startup tests must include a process launched by the real desktop Explorer; save its report outside AppData to avoid the same virtualized-path mismatch. `tests/probe_desktop_endpoint.py` supplies that check. Also test an isolated official profile without affecting the user's current window.
+
+Counters come from local read-only SQLite and rollout records. Thread cumulative usage takes priority over segment totals. Current context and its effective maximum come from the latest context record; compaction can lower current context. They are separate metrics. TTFT and elapsed/tool time use recorded events.
+
+From 2.0.3, speed uses complete official output-event observations matched to a single local response record: output tokens (including reasoning and tool arguments) divided by the interval from the first output item to the response usage record, minus independent tool execution time. Keep concurrent model/tool overlap in the denominator. It is a client estimate including network and buffering effects, not a server instantaneous rate. No character-count token estimates are used. Validate `generation.samples` and `generation.source` before claiming a measured speed. Unobserved history, replay, mid-response attachment, and ambiguous usage matches are not reconstructed. Valid numeric samples persist under the plugin state directory and stay visible until the next valid completed response updates them.

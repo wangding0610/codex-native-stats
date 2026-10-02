@@ -1,0 +1,10 @@
+{
+  "name": "codex-stats",
+  "interface": {"displayName": "Codex 输入栏统计"},
+  "plugins": [{
+    "name": "codex-native-stats",
+    "source": {"source": "local", "path": "./plugins/codex-native-stats"},
+    "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+    "category": "Productivity"
+  }]
+}

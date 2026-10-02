@@ -1,0 +1,31 @@
+{
+  "name": "codex-native-stats",
+  "version": "3.0.0",
+  "description": "在官方客户端输入栏显示会话统计和 Token 用量，支持插件启用/停用开关。",
+  "author": {
+    "name": "wangding0610"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex 输入栏统计",
+    "shortDescription": "官方客户端输入栏中的会话与 Token 统计",
+    "longDescription": "通过本地加载器，在官方客户端输入栏显示会话统计、累计 Token、当前上下文和最大上下文。使用插件开关显示或收起控件；首次连接需要正常退出并重新打开 App。官方安装文件不修改，使用当前已注册的官方包。客户端界面变化时加载器需要维护。",
+    "developerName": "wangding0610",
+    "category": "Productivity",
+    "brandColor": "#A1B8E9",
+    "logo": "./assets/icon.svg",
+    "composerIcon": "./assets/icon.svg",
+    "defaultPrompt": [
+      "查看输入栏统计插件的状态"
+    ],
+    "capabilities": [
+      "Read",
+      "Local statistics",
+      "Composer controls"
+    ]
+  },
+  "mcpServers": "./.mcp.json",
+  "license": "MIT",
+  "repository": "https://github.com/wangding0610/codex-native-stats",
+  "homepage": "https://github.com/wangding0610/codex-native-stats"
+}

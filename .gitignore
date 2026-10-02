@@ -1,0 +1,7 @@
+build/cache/
+build/payload/
+dist/
+validation/
+__pycache__/
+*.pyc
+*.bak
