@@ -7,11 +7,13 @@
 ## 安装
 
 1. 安装 Windows x64 微软商店版 Codex，至少启动过一次。
-2. 从 [GitHub Releases](https://github.com/wangding0610/codex-native-stats/releases/latest) 下载 `CodexStats-Setup-3.0.1-windows-x64.exe` 并运行。
+2. 从 [GitHub Releases](https://github.com/wangding0610/codex-native-stats/releases/latest) 下载 `CodexStats-Setup-3.0.2-windows-x64.exe` 并运行。
 3. 保存当前任务，**正常退出客户端一次**，再从桌面的 **Codex 官方版（输入栏统计）** 打开。
 4. 在 Codex 的「设置 → 插件」中找到 **Codex 输入栏统计**，可以启用或停用。
 
 安装器包含 Python、Node 和依赖，不需要另装 Conda、Python、Node，不需要管理员权限。默认安装到 `%USERPROFILE%\CodexNativeStats`，不修改系统 PATH 或 PowerShell 执行策略。首次发行未做代码签名。
+
+桌面、开始菜单和 Windows 已安装应用列表使用本机官方客户端的图标。安装器将图标缓存到插件版本目录，避免微软商店更新后旧包路径失效；缓存图标随插件卸载清理。
 
 首次安装不结束正在运行的官方客户端。原来以普通入口启动的窗口没有本地加载端点，等待再久也不能挂载控件；正常退出后使用上述入口。新建空对话没有统计，发送消息并产生本地记录后才显示。
 

@@ -5,7 +5,7 @@ import psutil
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import official_adapter as adapter
 
-VERSION='3.0.1'
+VERSION='3.0.2'
 def ensure_adapter(focus=False):
     adapter.STATE.mkdir(parents=True,exist_ok=True)
     (adapter.STATE/'cancel.signal').unlink(missing_ok=True)

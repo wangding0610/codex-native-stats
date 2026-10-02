@@ -99,14 +99,37 @@ def shortcut_target(file):
     link.QueryInterface(pythoncom.IID_IPersistFile).Load(str(file))
     return Path(link.GetPath(shell.SLGP_RAWPATH)[0]).resolve()
 
-def save_shortcut(file, target, argument, directory):
+def cache_official_icon(root, version):
+    """Keep a local icon so Store package version paths cannot break shortcuts."""
+    destination = safe_child(root,root/'versions'/version/'host/official-app.ico')
+    script = '[Console]::OutputEncoding=[Text.Encoding]::UTF8; (Get-AppxPackage -Name OpenAI.Codex | Sort-Object Version -Descending | Select-Object -First 1).InstallLocation'
+    try:
+        result = subprocess.run(['powershell.exe','-NoProfile','-Command',script],
+                                capture_output=True,encoding='utf-8',timeout=15,
+                                creationflags=NO_WINDOW,check=True)
+        location = result.stdout.strip()
+        if location:
+            package = Path(location)
+            if package.parent.name.lower()=='windowsapps' and package.name.lower().startswith('openai.codex_'):
+                for name in ['chatgpt-app-dark.ico','icon-chatgpt.ico','chatgpt-app-light.ico']:
+                    source = package/'app/resources'/name
+                    if source.is_file() and source.read_bytes()[:4]==b'\x00\x00\x01\x00':
+                        destination.parent.mkdir(parents=True,exist_ok=True)
+                        shutil.copyfile(source,destination)
+                        break
+    except (OSError,subprocess.SubprocessError): pass
+    return destination if destination.is_file() else None
+
+def save_shortcut(file, target, argument, directory, icon=None):
     import pythoncom
-    from win32com.shell import shell
+    from win32com.shell import shell,shellcon
     link = pythoncom.CoCreateInstance(shell.CLSID_ShellLink,None,pythoncom.CLSCTX_INPROC_SERVER,shell.IID_IShellLink)
     link.SetPath(str(target)); link.SetArguments(argument); link.SetWorkingDirectory(str(directory))
     link.SetShowCmd(7); link.SetDescription('官方 Codex 客户端与本地输入栏统计')
+    if icon: link.SetIconLocation(str(icon),0)
     # IPersistFile uses Unicode paths, unlike WScript.Save on some ANSI locales.
     link.QueryInterface(pythoncom.IID_IPersistFile).Save(str(file),0)
+    shell.SHChangeNotify(shellcon.SHCNE_UPDATEITEM,shellcon.SHCNF_PATHW,str(file),None)
 
 def integrations(root, version, home):
     from win32com.shell import shell, shellcon
@@ -114,13 +137,14 @@ def integrations(root, version, home):
     desktop = Path(shell.SHGetFolderPath(0,shellcon.CSIDL_DESKTOPDIRECTORY,0,0))
     programs = Path(shell.SHGetFolderPath(0,shellcon.CSIDL_PROGRAMS,0,0))/'Codex 输入栏统计'
     programs.mkdir(parents=True, exist_ok=True)
+    icon = cache_official_icon(root,version)
     for file, argument in [(desktop/'Codex 官方版（输入栏统计）.lnk','--launch'),
                            (programs/'Codex 官方版（输入栏统计）.lnk','--launch'),
                            (programs/'卸载 Codex 输入栏统计.lnk','--uninstall')]:
         if file.exists():
             if shortcut_target(file) != (root/'CodexStats.exe').resolve():
                 raise RuntimeError('快捷方式名称已由其他应用使用：'+file.name)
-        save_shortcut(file,root/'CodexStats.exe',argument,root); shortcuts.append(str(file))
+        save_shortcut(file,root/'CodexStats.exe',argument,root,icon); shortcuts.append(str(file))
     with winreg.CreateKey(winreg.HKEY_CURRENT_USER, REGISTRY) as key:
         winreg.SetValueEx(key, 'InstallRoot', 0, winreg.REG_SZ, str(root))
     with winreg.CreateKey(winreg.HKEY_CURRENT_USER, UNINSTALL) as key:
@@ -129,6 +153,7 @@ def integrations(root, version, home):
                             'UninstallString':f'"{root / "CodexStats.exe"}" --uninstall',
                             'URLInfoAbout':'https://github.com/wangding0610/codex-native-stats'}.items():
             winreg.SetValueEx(key, name, 0, winreg.REG_SZ, value)
+        if icon: winreg.SetValueEx(key,'DisplayIcon',0,winreg.REG_SZ,str(icon)+',0')
         for name in ['NoModify','NoRepair']: winreg.SetValueEx(key, name, 0, winreg.REG_DWORD, 1)
     return shortcuts
 
